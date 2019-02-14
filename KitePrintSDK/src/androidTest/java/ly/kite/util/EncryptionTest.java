@@ -11,12 +11,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
 
 import junit.framework.Assert;
-import junit.framework.AssertionFailedError;
 
 import java.util.Random;
 
 import ly.kite.KiteSDK;
-import ly.kite.SecurePreferences;
+import ly.kite.security.SecurePreferences;
 import ly.kite.address.Address;
 import ly.kite.address.Country;
 import ly.kite.ordering.Order;

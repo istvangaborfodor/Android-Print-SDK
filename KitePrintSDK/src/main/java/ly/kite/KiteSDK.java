@@ -40,7 +40,6 @@ package ly.kite;
 ///// Import(s) /////
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Currency;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -64,16 +63,14 @@ import ly.kite.address.Address;
 import ly.kite.address.Country;
 import ly.kite.catalogue.Catalogue;
 import ly.kite.catalogue.MultipleCurrencyAmounts;
-import ly.kite.catalogue.Product;
-import ly.kite.journey.AKiteActivity;
 import ly.kite.journey.ordering.OrderHistoryActivity;
 import ly.kite.ordering.OrderingDataAgent;
 import ly.kite.catalogue.CatalogueLoader;
 import ly.kite.checkout.PaymentActivity;
 import ly.kite.journey.basket.BasketActivity;
 import ly.kite.ordering.Order;
-import ly.kite.ordering.OrderingDatabaseAgent;
 import ly.kite.payment.PayPalCard;
+import ly.kite.security.SecurePreferences;
 import ly.kite.util.Asset;
 import ly.kite.journey.AImageSource;
 import ly.kite.journey.selection.ProductSelectionActivity;
@@ -189,7 +186,6 @@ public class KiteSDK
   static public final int    ACTIVITY_REQUEST_CODE_FIRST                           = 10;
 
   static public String ENCRYPTION_KEY = "TQdZ6I0KwWQjpNYyAbHGPYWRVMMcgUbWuE0JC0MA";// Add own key or set string to "OFF" to disable
-  static public String ENCRYPTION_MODE = "dynamic";
 
   ////////// Static Variable(s) //////////
 
@@ -286,7 +282,7 @@ public class KiteSDK
     String key = getParameterKey( prefix, name );
 
     ///////// Encryption initializer //////////
-    SecurePreferences pref = new SecurePreferences(ENCRYPTION_KEY);
+    SecurePreferences pref = new SecurePreferences(context, ENCRYPTION_KEY);
 
     scope.sharedPreferences( context )
             .edit()
@@ -304,7 +300,7 @@ public class KiteSDK
   static private String getStringParameter( Context context, Scope scope, String prefix, String name, String defaultValue )
     {
     ///////// Decryption initializer //////////
-    SecurePreferences pref = new SecurePreferences(ENCRYPTION_KEY);
+    SecurePreferences pref = new SecurePreferences(context, ENCRYPTION_KEY);
 
     String keyOriginal = getParameterKey( prefix, name );
     String keyEncrypted = pref.encrypt(keyOriginal);//Re-encrypt the key s.t. it will match the one stored in the preference files
@@ -356,7 +352,7 @@ public class KiteSDK
     {
 
     //////// Encryption initializer //////////
-    SecurePreferences pref = new SecurePreferences(ENCRYPTION_KEY);
+    SecurePreferences pref = new SecurePreferences(context, ENCRYPTION_KEY);
 
     String key = pref.encrypt(getParameterKey( prefix, name ));
 
@@ -383,7 +379,7 @@ public class KiteSDK
    *****************************************************/
   static private boolean getBooleanParameter( Context context, Scope scope, String prefix, String name, boolean defaultValue ) {
     //////// Decryption initializer //////////
-    SecurePreferences pref = new SecurePreferences(ENCRYPTION_KEY);
+    SecurePreferences pref = new SecurePreferences(context, ENCRYPTION_KEY);
     String keyOriginal = getParameterKey(prefix, name);
     String keyEncrypted = pref.encrypt(keyOriginal);//Re-encrypt the key s.t. it will match the one stored in the preference files
 
@@ -432,7 +428,7 @@ public class KiteSDK
     String key = getParameterKey( prefix, name );
 
       ///////// Encryption initializer //////////
-      SecurePreferences pref = new SecurePreferences(ENCRYPTION_KEY);
+      SecurePreferences pref = new SecurePreferences(context, ENCRYPTION_KEY);
 
       scope.sharedPreferences( context )
       .edit()
@@ -456,7 +452,7 @@ public class KiteSDK
   static private Address getAddressParameter( Context context, Scope scope, String prefix, String name )
     {
     //////// Decryption initializer //////////
-    SecurePreferences pref = new SecurePreferences(ENCRYPTION_KEY);
+    SecurePreferences pref = new SecurePreferences(context, ENCRYPTION_KEY);
 
     String key = getParameterKey( prefix, name );
 
@@ -583,7 +579,7 @@ public class KiteSDK
     String key = getParameterKey( prefix, name );
 
     //////// Encryption initializer //////////
-    SecurePreferences pref = new SecurePreferences(ENCRYPTION_KEY);
+    SecurePreferences pref = new SecurePreferences(context, ENCRYPTION_KEY);
 
     if (stringSet == null) {
       scope.sharedPreferences( context )
@@ -615,7 +611,7 @@ public class KiteSDK
   static private Set<String> getStringSetParameter( Context context, Scope scope, String prefix, String name )
     {
     //////// Decryption initializer //////////
-    SecurePreferences pref = new SecurePreferences(ENCRYPTION_KEY);
+    SecurePreferences pref = new SecurePreferences(context, ENCRYPTION_KEY);
 
     String originalKey = getParameterKey( prefix, name );
     String encryptedKey = pref.encrypt(originalKey);

@@ -63,7 +63,7 @@ import java.util.List;
 import java.util.Locale;
 
 import ly.kite.KiteSDK;
-import ly.kite.SecurePreferences;
+import ly.kite.security.SecurePreferences;
 import ly.kite.address.Address;
 import ly.kite.address.Country;
 import ly.kite.catalogue.Catalogue;

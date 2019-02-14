@@ -1,4 +1,4 @@
-package ly.kite;
+package ly.kite.security;
 
 
 /*
@@ -23,32 +23,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import android.content.Context;
 import android.os.Build;
-import android.security.KeyPairGeneratorSpec;
-import android.security.keystore.KeyGenParameterSpec;
-import android.security.keystore.KeyProperties;
-import android.support.annotation.RequiresApi;
 import android.util.Base64;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.UnrecoverableEntryException;
-import java.security.cert.CertificateException;
+import java.security.SecureRandom;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import javax.security.auth.x500.X500Principal;
+
+import ly.kite.KiteSDK;
 
 
 public class SecurePreferences {
@@ -60,10 +52,6 @@ public class SecurePreferences {
         }
 
     }
-
-    private static final String PROVIDER = "AndroidKeyStore";
-    private static final String ALIAS = "securePreferences";
-    private static final String M_TRANSFORMATION = "AES/CBC/PKCS7Padding";
 
     private static final String TRANSFORMATION = "AES/CBC/PKCS5Padding";
     private static final String SECRET_KEY_HASH_TRANSFORMATION = "SHA-256";
@@ -78,30 +66,27 @@ public class SecurePreferences {
     /**
      * This will initialize an instance of the SecurePreferences class
      *
-     * @param secureKey the key used for encryption, finding a good key scheme is hard.
-     *                  Hardcoding your key in the application is bad, but better than plaintext preferences. Having the user enter the key upon application launch is a safe(r) alternative, but annoying to the user.
-     *                  true will encrypt both values and keys. Keys can contain a lot of information about
-     *                  the plaintext value of the value which can be used to decipher the value.
+     * @param secureKey the key used for encryption.
+     *                  The SDK will use dynamic keys generated on first use and safely stored
+     *                  backed by hardware TSL.
      * @throws SecurePreferencesException
      */
-    public SecurePreferences(String secureKey) throws SecurePreferencesException {
-        if (KiteSDK.ENCRYPTION_KEY.equals("off"))
+    public SecurePreferences(Context context, String secureKey) throws SecurePreferencesException {
+        if (secureKey.equals("off"))
             encryptData = false;
 
-        //TODO migrate data encrypted with legacy key
-        String tempKey = null;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (secureKey.equals("dynamic") &&
+        android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
             try {
-                tempKey = Base64.encodeToString(getSecureKey().getEncoded(), Base64.DEFAULT);
-            } catch (Exception e) {
-                e.printStackTrace();
+                secureKey = SecretWrapper.getSecret(context);
+            } catch (GeneralSecurityException e) {
+                throw new SecurePreferencesException(e);
+            } catch (IOException e) {
+                throw new SecurePreferencesException(e);
             }
         }
 
-        if(tempKey != null)
-            this.secureKey = tempKey;
-        else
-            this.secureKey = secureKey;
+        this.secureKey = secureKey;
 
         reset();
     }
@@ -184,33 +169,6 @@ public class SecurePreferences {
             return cipher.doFinal(bs);
         } catch (Exception e) {
             throw new SecurePreferencesException(e);
-        }
-    }
-
-
-    @RequiresApi(api = Build.VERSION_CODES.M)
-    private SecretKey getSecureKey() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException, UnrecoverableEntryException, NoSuchProviderException, InvalidAlgorithmParameterException {
-        // key retrieval
-        KeyStore keyStore = KeyStore.getInstance(PROVIDER);
-        keyStore.load(null);
-
-        KeyStore.SecretKeyEntry entry = (KeyStore.SecretKeyEntry) keyStore.getEntry(ALIAS, null);
-        if (entry != null) {
-            return entry.getSecretKey();
-        } else {
-            // key generation
-            KeyGenParameterSpec.Builder builder = new KeyGenParameterSpec.Builder(ALIAS,
-                KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT);
-
-            KeyGenParameterSpec keySpec = builder
-                .setKeySize(128)
-                .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
-                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
-                .build();
-
-            KeyGenerator kg = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, PROVIDER);
-            kg.init(keySpec);
-            return kg.generateKey();
         }
     }
 }
