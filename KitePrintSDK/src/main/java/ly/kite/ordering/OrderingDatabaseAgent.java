@@ -248,6 +248,7 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
 
   ////////// Member Variable(s) //////////
 
+  private Context mApplicationContext;
 
   ////////// Static Initialiser(s) //////////
 
@@ -288,9 +289,9 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
 
   ////////// Constructor(s) //////////
 
-  public OrderingDatabaseAgent( Context context, CursorFactory factory )
-    {
-    super( context, DATABASE_NAME, factory, DATABASE_VERSION );
+    public OrderingDatabaseAgent(Context context, CursorFactory factory) {
+      super(context, DATABASE_NAME, factory, DATABASE_VERSION);
+      mApplicationContext = context.getApplicationContext();
     }
 
 
@@ -392,7 +393,7 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
     ContentValues contentValues = new ContentValues();
 
      //////// Encryption initialiser //////////
-    SecurePreferences pref = new SecurePreferences(KiteSDK.ENCRYPTION_KEY);
+    SecurePreferences pref = new SecurePreferences(mApplicationContext, KiteSDK.ENCRYPTION_KEY);
 
     contentValues.put( "date",         pref.encrypt(getDateString() ));  // e.g. 02 June 2016
     contentValues.put( "description",  pref.encrypt(description ));
@@ -414,7 +415,7 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
     ContentValues contentValues = getOrderContentValues( description );
 
     //////// Encryption initialiser //////////
-    SecurePreferences pref = new SecurePreferences(KiteSDK.ENCRYPTION_KEY);
+    SecurePreferences pref = new SecurePreferences(mApplicationContext, KiteSDK.ENCRYPTION_KEY);
 
     contentValues.put( "pricing_json", pref.encrypt(pricingJSON) );
     contentValues.put( "receipt",      pref.encrypt(receipt) );
@@ -429,7 +430,7 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
    *
    *****************************************************/
   private void updateOrderHistoryItem (OrderHistoryItem orderHistoryItem, SQLiteDatabase database) {
-    SecurePreferences pref = new SecurePreferences(KiteSDK.ENCRYPTION_KEY);
+    SecurePreferences pref = new SecurePreferences(mApplicationContext, KiteSDK.ENCRYPTION_KEY);
 
     StringBuilder sqlStringBuilder = new StringBuilder()
         .append( "UPDATE " ).append( TABLE_ORDER )
@@ -460,7 +461,7 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
    *
    *****************************************************/
   private void updateOrderAdditionalParameters(HashMap<String,String> additionalParametersMap, Long orderId, SQLiteDatabase database) {
-    SecurePreferences pref = new SecurePreferences(KiteSDK.ENCRYPTION_KEY);
+    SecurePreferences pref = new SecurePreferences(mApplicationContext, KiteSDK.ENCRYPTION_KEY);
 
     String sqlDelete = "DELETE FROM " + TABLE_ORDER_ADDITIONAL_PARAMETER + " WHERE order_id = " + orderId;
 
@@ -486,7 +487,7 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
    *
    *****************************************************/
   private void updateAddress(Long addressId, Address address, SQLiteDatabase database) {
-    SecurePreferences pref = new SecurePreferences(KiteSDK.ENCRYPTION_KEY);
+    SecurePreferences pref = new SecurePreferences(mApplicationContext, KiteSDK.ENCRYPTION_KEY);
 
     StringBuilder sqlStringBuilder = new StringBuilder()
         .append( "UPDATE " ).append( TABLE_ADDRESS )
@@ -524,7 +525,7 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
        return;
     }
 
-    SecurePreferences pref = new SecurePreferences(KiteSDK.ENCRYPTION_KEY);
+    SecurePreferences pref = new SecurePreferences(mApplicationContext, KiteSDK.ENCRYPTION_KEY);
 
     database.execSQL( "UPDATE " + TABLE_ITEM + " SET product_id = '" +  pref.encrypt(productId) + "' WHERE id = " + itemId );
     database.close();
@@ -539,7 +540,7 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
     *****************************************************/
     public void updateBasketOption( long itemId, String name, String value, SQLiteDatabase database)
     {
-      SecurePreferences pref = new SecurePreferences(KiteSDK.ENCRYPTION_KEY);
+      SecurePreferences pref = new SecurePreferences(mApplicationContext, KiteSDK.ENCRYPTION_KEY);
 
       StringBuilder sqlStringBuilder = new StringBuilder()
           .append( "UPDATE " ).append( TABLE_OPTION )
@@ -569,7 +570,7 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
         return;
       }
 
-      SecurePreferences pref = new SecurePreferences(KiteSDK.ENCRYPTION_KEY);
+      SecurePreferences pref = new SecurePreferences(mApplicationContext, KiteSDK.ENCRYPTION_KEY);
       database.execSQL( "UPDATE " + TABLE_IMAGE_SPEC + " SET image_file_name = '" +  pref.encrypt(image_file_name) + "' WHERE id = " + id );
       pref.reset();
     }
@@ -589,7 +590,7 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
       return;
     }
 
-    SecurePreferences pref = new SecurePreferences(KiteSDK.ENCRYPTION_KEY);
+    SecurePreferences pref = new SecurePreferences(mApplicationContext, KiteSDK.ENCRYPTION_KEY);
     database.execSQL(sqlDelete);
     for ( String name : additionalParametersMap.keySet() ) {
       ContentValues contentValues = new ContentValues();
@@ -613,7 +614,7 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
     ContentValues contentValues = getOrderContentValues( order.getItemsDescription() );
 
     //////// Encryption initialiser //////////
-    SecurePreferences pref = new SecurePreferences(KiteSDK.ENCRYPTION_KEY);
+    SecurePreferences pref = new SecurePreferences(mApplicationContext, KiteSDK.ENCRYPTION_KEY);
 
 
     // Create a shipping address
@@ -724,7 +725,7 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
 
 
     //////// Encryption initialiser //////////
-    SecurePreferences pref = new SecurePreferences(KiteSDK.ENCRYPTION_KEY);
+    SecurePreferences pref = new SecurePreferences(mApplicationContext, KiteSDK.ENCRYPTION_KEY);
     try
       {
       // Go through each of the options
@@ -964,7 +965,7 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
     ContentValues contentValues = new ContentValues();
 
     //////// Encryption initialiser //////////
-    SecurePreferences pref = new SecurePreferences(KiteSDK.ENCRYPTION_KEY);
+    SecurePreferences pref = new SecurePreferences(mApplicationContext, KiteSDK.ENCRYPTION_KEY);
 
     if ( itemId >= 0 ) contentValues.put( "id", itemId );
     contentValues.put( "basket_id",      basketId );
@@ -1080,7 +1081,7 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
       }
 
     //////// Encryption initialiser //////////
-    SecurePreferences pref = new SecurePreferences(KiteSDK.ENCRYPTION_KEY);
+    SecurePreferences pref = new SecurePreferences(mApplicationContext, KiteSDK.ENCRYPTION_KEY);
 
     try
       {
@@ -1153,7 +1154,7 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
     long[] imageSpecIds = new long[ imageSpecs.length ];
 
     //////// Encryption initialiser //////////
-    SecurePreferences pref = new SecurePreferences(KiteSDK.ENCRYPTION_KEY);
+    SecurePreferences pref = new SecurePreferences(mApplicationContext, KiteSDK.ENCRYPTION_KEY);
 
     try
       {
@@ -1293,7 +1294,7 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
     ContentValues contentValues = new ContentValues();
 
     //////// Encryption initialiser //////////
-    SecurePreferences pref = new SecurePreferences(KiteSDK.ENCRYPTION_KEY);
+    SecurePreferences pref = new SecurePreferences(mApplicationContext, KiteSDK.ENCRYPTION_KEY);
 
     contentValues.put( "image_spec_id", imageSpecId );
     contentValues.put( "name",          pref.encrypt(name) );
@@ -1385,7 +1386,7 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
     ContentValues contentValues = new ContentValues();
 
     //////// Encryption initialiser //////////
-    SecurePreferences pref = new SecurePreferences(KiteSDK.ENCRYPTION_KEY);
+    SecurePreferences pref = new SecurePreferences(mApplicationContext, KiteSDK.ENCRYPTION_KEY);
 
     putStringOrNull( contentValues, "recipient_name",     pref.encrypt (address.getRecipientName() ));
     putStringOrNull( contentValues, "line1",              pref.encrypt (address.getLine1() ));
@@ -1513,7 +1514,7 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
 
       while ( cursor.moveToNext() )
         {
-          SecurePreferences pref = new SecurePreferences(KiteSDK.ENCRYPTION_KEY);
+          SecurePreferences pref = new SecurePreferences(mApplicationContext, KiteSDK.ENCRYPTION_KEY);
           boolean hasToBeEncrypted = false;
           long orderId;
           String dateString;
@@ -1804,7 +1805,7 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
     // Initialise the database and cursor
     SQLiteDatabase database = null;
     Cursor         cursor   = null;
-    SecurePreferences pref = new SecurePreferences(KiteSDK.ENCRYPTION_KEY);
+    SecurePreferences pref = new SecurePreferences(mApplicationContext, KiteSDK.ENCRYPTION_KEY);
 
     try
       {
@@ -1939,7 +1940,7 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
         String countryISO2Code;
 
         try {
-          SecurePreferences pref = new SecurePreferences(KiteSDK.ENCRYPTION_KEY);
+          SecurePreferences pref = new SecurePreferences(mApplicationContext, KiteSDK.ENCRYPTION_KEY);
           addressId = cursor.getLong(cursor.getColumnIndex("id"));
           recipientName = pref.decrypt(getStringOrNull(cursor, "recipient_name"));
           line1 = pref.decrypt(getStringOrNull(cursor, "line1"));
@@ -2063,7 +2064,7 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
         long itemId = itemContentValues.getAsLong("item_id");
         String productId;
         try {
-          SecurePreferences pref = new SecurePreferences(KiteSDK.ENCRYPTION_KEY);
+          SecurePreferences pref = new SecurePreferences(mApplicationContext, KiteSDK.ENCRYPTION_KEY);
           productId = pref.decrypt(itemContentValues.getAsString("product_id"));
           pref.reset();
         } catch (Exception e) {
@@ -2329,7 +2330,7 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
         String name;
         String value;
         try {
-          SecurePreferences pref = new SecurePreferences(KiteSDK.ENCRYPTION_KEY);
+          SecurePreferences pref = new SecurePreferences(mApplicationContext, KiteSDK.ENCRYPTION_KEY);
           name = pref.decrypt(cursor.getString(cursor.getColumnIndex("name")));
           value = pref.decrypt(cursor.getString(cursor.getColumnIndex("value")));
           pref.reset();
@@ -2436,7 +2437,7 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
           String imageFileName;
           try {
             //////// Decryption initialiser //////////
-            SecurePreferences pref = new SecurePreferences(KiteSDK.ENCRYPTION_KEY);
+            SecurePreferences pref = new SecurePreferences(mApplicationContext, KiteSDK.ENCRYPTION_KEY);
             imageFileName = pref.decrypt(cursor.getString(cursor.getColumnIndex("image_file_name")));
             pref.reset();
           } catch (Exception e) {
@@ -2540,7 +2541,7 @@ public class OrderingDatabaseAgent extends SQLiteOpenHelper
         String name;
         String value;
         try {
-          SecurePreferences pref = new SecurePreferences(KiteSDK.ENCRYPTION_KEY);
+          SecurePreferences pref = new SecurePreferences(mApplicationContext, KiteSDK.ENCRYPTION_KEY);
           name = pref.decrypt(cursor.getString(cursor.getColumnIndex("name")));
           value = pref.decrypt(cursor.getString(cursor.getColumnIndex("value")));
           pref.reset();
